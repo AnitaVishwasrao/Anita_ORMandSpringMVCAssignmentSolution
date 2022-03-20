@@ -42,8 +42,11 @@ public class CustomerController {
 	@RequestMapping("/edit-customer-details")
 	public String showCustomerDetailsForm(@RequestParam("customerId") int customerId, Model model) {
 		Customer customer = customerService.findById(customerId);
-		model.addAttribute("customer", customer);
-		return "customer-details";
+		if (customer != null) {
+			model.addAttribute("customer", customer);
+			return "customer-details";
+		}
+		return "redirect:./message?msg=" + "Failed to find customer with id " + customerId;
 	}
 
 	@PostMapping("/save")
@@ -55,12 +58,11 @@ public class CustomerController {
 					customerModel.getLastName(), customerModel.getEmail());
 		} else {
 			customer = customerService.findById(customerModel.getCustomerId());
-			if (customer == null) {
-				customer = new Customer();
+			if (customer != null) {
+				customer.setFirstName(customerModel.getFirstName());
+				customer.setLastName(customerModel.getLastName());
+				customer.setEmail(customerModel.getEmail());
 			}
-			customer.setFirstName(customerModel.getFirstName());
-			customer.setLastName(customerModel.getLastName());
-			customer.setEmail(customerModel.getEmail());
 		}
 
 		return customerService.save(customer) ? "redirect: ./customers"
